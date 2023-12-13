@@ -6,7 +6,7 @@ import java.util.Scanner;
 
 public class RsaAttacks {
     public static BigInteger e = new BigInteger("10001", 16);
-    
+
    /* private static BigInteger sn(BigInteger x, int n)
     {
 
@@ -78,12 +78,13 @@ public class RsaAttacks {
         System.out.println("C = " + C.toString(10));
         System.out.println();
         System.out.println(N.toString(16));
-        int l = 31;
+        long l = 31;
+        l = (int) Math.pow(2,25);
         ArrayList<BigInteger> X = new ArrayList<>();
         ArrayList<BigInteger> T = new ArrayList<>();
-        int flag = -1;
+        int flag = -1, flagX = 0;
         //Calculate T^e and S^-e
-        for(int i =1; i < (2^l); i++)
+        for(int i =1; i < l; i++)
         {
             BigInteger temp = new BigInteger(String.valueOf(i));
             X.add(temp.modPow(e,N));
@@ -102,6 +103,7 @@ public class RsaAttacks {
             if (flag != -1)
             {
                 RCs = X.get(i);
+                flagX = i+1;
                 break;
             }
         }
@@ -110,11 +112,11 @@ public class RsaAttacks {
             System.out.println("Answer" + flag);
 
             //Verify
-            System.out.println("Expected -- M1 = " + RCs);
-            System.out.println("Expected -- M2 = " + X.get(flag));
+            System.out.println("Expected -- M1 = " + flagX);
+            System.out.println("Expected -- M2 = " + flag + 1);
             System.out.println("(M1*M2)^e = ");
             BigInteger Cnew = RCs.multiply(X.get(flag));
-            System.out.println(Cnew.modPow(e, N));
+            System.out.println(Cnew.mod(N));
             System.out.println("Real C = ");
             System.out.println(C);
         }
