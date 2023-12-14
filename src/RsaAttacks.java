@@ -1,12 +1,13 @@
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.math.BigInteger;
+import java.sql.Time;
 import java.util.ArrayList;
 import java.util.Scanner;
 
 public class RsaAttacks {
     public static BigInteger e = new BigInteger("10001", 16);
-    public static BigInteger e1 = new BigInteger("3", 10);
+    public static BigInteger e1 = new BigInteger("5", 10);
     public static BigInteger ten = new BigInteger("10", 10);
 
     public static BigInteger power(BigInteger N, BigInteger pow){
@@ -72,7 +73,7 @@ public class RsaAttacks {
             delimnum.add(temp);
         }
         int q1 = Integer.parseInt(delimnum.get(0));
-        double deg = 1.0/3.0;
+        double deg = 1.0/5.0;
         int tempa = (int) Math.pow(q1, deg);
         BigInteger temp = new BigInteger(Integer.toString(tempa), 10);
         answer = String.valueOf(temp);
@@ -170,23 +171,25 @@ public class RsaAttacks {
         {
             String temp = parse.get(i);
             temp = temp.substring(7,parse.get(i).length());
-            if(i %2!=0) Ci.add(new BigInteger(temp,16));
-            else Ni.add(new BigInteger(temp,16));
-
+            if(i %2!=0) Ni.add(new BigInteger(temp,16));
+            else Ci.add(new BigInteger(temp,16));
         }
+        long t1 = System.currentTimeMillis();
         ArrayList<BigInteger> NX = China(Ci,Ni);
         BigInteger N = NX.get(0);
         BigInteger C = NX.get(1);
         System.out.println("N = " + N.toString(16));
         System.out.println("C=M^" + e1 + " = " + C.mod(N).toString(16));
         String nub = NumbRoot(C);
-        System.out.println("Check root");
         BigInteger Mexp = new BigInteger(nub, 10);
-        System.out.println("////////");
-        System.out.println("/////////");
         System.out.println("M = " + Mexp.toString(16));
+        System.out.println("Check root");
         System.out.println("M^e = " + Mexp.modPow(e1,N).toString(16));
+        long t2 = System.currentTimeMillis();
+        System.out.println("Times attack : " + (t2-t1) + "mls");
         System.out.println("_____________________________________________________________________");
+
+
         parse = new ArrayList<>();
         reader = new BufferedReader(new FileReader("C:\\01_Mit.txt"));
         while ((line = reader.readLine()) != null) {
@@ -204,12 +207,13 @@ public class RsaAttacks {
         System.out.println();
         System.out.println("N = " + N.toString(16));
         long l;
-        l = (int) Math.pow(2,26);
+        l = (int) Math.pow(2,22);
+        t1 = System.currentTimeMillis();
         ArrayList<BigInteger> X = new ArrayList<>();
         ArrayList<BigInteger> T = new ArrayList<>();
         int flag = -1, flagX = 0;
         //Calculate T^e and S^-e
-        for(int i =1; i < l; i++)
+        for(long i =1; i < l; i++)
         {
             BigInteger temp = new BigInteger(String.valueOf(i));
             X.add(temp.modPow(e,N));
@@ -238,12 +242,14 @@ public class RsaAttacks {
 
             //Verify
             System.out.println("Expected -- M1 = " + flagX);
-            System.out.println("Expected -- M2 = " + flag + 1);
+            System.out.println("Expected -- M2 = " + (flag + 1));
             System.out.println("(M1*M2)^e = ");
             BigInteger Cnew = RCs.multiply(X.get(flag));
-            System.out.println(Cnew.mod(N));
+            System.out.println(Cnew.mod(N).toString(16));
             System.out.println("Real C = ");
-            System.out.println(C);
+            System.out.println(C.toString(16));
+            t2 = System.currentTimeMillis();
+            System.out.println("Times attack : " + (t2-t1) + "mls");
         }
     }
 }
