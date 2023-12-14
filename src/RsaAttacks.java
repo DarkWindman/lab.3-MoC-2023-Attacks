@@ -6,24 +6,75 @@ import java.util.Scanner;
 
 public class RsaAttacks {
     public static BigInteger e = new BigInteger("10001", 16);
-
+    public static BigInteger e1 = new BigInteger("3", 10);
    /* private static BigInteger sn(BigInteger x, int n)
     {
 
     }*/
 
-   public static BigInteger Ith_Root(BigInteger N, BigInteger K) {
+    public static BigInteger power(BigInteger N, BigInteger pow){
+        BigInteger staticN = N;
+        String BitPow = pow.toString(2);
+        for(int i=0; i<BitPow.length(); i++){
+            N = N.pow(2);
+            if(BitPow.charAt(i) == '1'){
+                N=N.multiply(staticN);
+            }
+        }
+        return N;
+    }
 
-       BigInteger K1 = K.subtract(BigInteger.ONE);
-       BigInteger S  = N.add(BigInteger.ONE);
-       BigInteger U  = N;
-       while (U.compareTo(S)==-1) {
-           S = U;
-           U = (U.multiply(K1).add(N.divide(U.pow(K1.intValue())))).divide(K);
-       }
-       String str=""+N+"^1/"+K+"="+S;System.out.println(str);
-       return S;
+   public static BigInteger Mod_Root(BigInteger a, BigInteger N) {
+        BigInteger deg = N.subtract(BigInteger.ONE);
+        deg = deg.divide(e1);
+        System.out.println( "M = " + a.modPow(deg, N).toString(16));
+        return deg;
    }
+
+    public static BigInteger Kth_Root(BigInteger N, BigInteger K) {
+
+        BigInteger K1 = K.subtract(BigInteger.ONE);
+        BigInteger S  = N.add(BigInteger.ONE);
+        BigInteger U  = N;
+        while (U.compareTo(S) == -1) {
+            S = U;
+            U = power(U, K1);
+            N = N.divide(U);
+            BigInteger Utemp = U.multiply(K1);
+            Utemp = Utemp.add(U);
+            U=Utemp.divide(K);
+        }
+        return S;
+    }
+
+    public static ArrayList<BigInteger> China(ArrayList<BigInteger> Ci, ArrayList<BigInteger> Ni) {
+
+        BigInteger N = new BigInteger("1",10);
+        BigInteger C = new BigInteger("1", 16);
+        ArrayList<BigInteger> Mi = new ArrayList<>();
+        ArrayList<BigInteger> ni = new ArrayList<>();
+        for(int i =0; i< Ni.size();i++) {
+            N = N.multiply(Ni.get(i));
+            C = C.multiply(Ci.get(i));
+        }
+        ArrayList<BigInteger> sol = new ArrayList<>();
+        sol.add(N);
+        for (BigInteger bigInteger : Ni) {
+            BigInteger Mt = N.divide(bigInteger);
+            Mi.add(Mt);
+        }
+        for(int i =0; i< Mi.size();i++) {
+            BigInteger Nt = Mi.get(i).modInverse(Ni.get(i));
+            ni.add(Nt);
+        }
+        BigInteger X = new BigInteger("0",10);
+        for(int i = 0; i < Ci.size(); i++) {
+            X = X.add((ni.get(i).multiply(Ci.get(i))).multiply(Mi.get(i)));
+        }
+        X = X.mod(N);
+        sol.add(X);
+        return sol;
+    }
 
     public static void main(String[] args) throws Exception {
         ArrayList<String> parse = new ArrayList<>();
@@ -49,20 +100,18 @@ public class RsaAttacks {
             else Ni.add(new BigInteger(temp,16));
 
         }
-        System.out.println(Ni.get(0).toString(16));
-        System.out.println(Ci.get(0).toString(16));
-        BigInteger N = new BigInteger("1",10);
-        BigInteger C = new BigInteger("1", 16);
-        for(int i =0; i< Ni.size();i++)
-        {
-            N = N.multiply(Ni.get(i));
-            C = C.multiply(Ci.get(i));
-        }
-        System.out.println(C.toString(10));
-        System.out.println(Ith_Root(C,new BigInteger("3",10)));
+        ArrayList<BigInteger> NX = China(Ci,Ni);
+        BigInteger N = NX.get(0);
+        BigInteger C = NX.get(1);
+        System.out.println("C=M^" + e1 + " = " + C.toString(16));
+        BigInteger deg = Mod_Root(C,N);
+        System.out.println("e = " + deg);
 
+        System.out.println("M^" + deg + "= " + C.modPow(deg, N).toString(16));
 
-        parse = new ArrayList<>();
+        //String.valueOf(base.pow(1, n))
+        System.out.println("_____________________________________________________________________");
+        /*parse = new ArrayList<>();
         reader = new BufferedReader(new FileReader("C:\\01_Mit.txt"));
         while ((line = reader.readLine()) != null) {
             scanner = new Scanner(line);
@@ -75,11 +124,11 @@ public class RsaAttacks {
         }
         C = new BigInteger(parse.get(0),16);
         N = new BigInteger(parse.get(1), 16);
-        System.out.println("C = " + C.toString(10));
+        System.out.println("C = " + C.toString(16));
         System.out.println();
-        System.out.println(N.toString(16));
-        long l = 31;
-        l = (int) Math.pow(2,25);
+        System.out.println("N = " + N.toString(16));
+        long l;
+        l = (int) Math.pow(2,26);
         ArrayList<BigInteger> X = new ArrayList<>();
         ArrayList<BigInteger> T = new ArrayList<>();
         int flag = -1, flagX = 0;
@@ -88,11 +137,11 @@ public class RsaAttacks {
         {
             BigInteger temp = new BigInteger(String.valueOf(i));
             X.add(temp.modPow(e,N));
-            T.add(X.get(i-1).modInverse(N));
         }
         //Calculate Cs
         BigInteger RCs = new BigInteger("1");
-        for (int i = 0; i < T.size(); i++) {
+        for (int i = 0; i < X.size(); i++) {
+            T.add(X.get(i).modInverse(N));
             BigInteger Cs = C.multiply(T.get(i)).mod(N);
             for (int j = 0; j < X.size(); j++) {
                 if (Cs.equals(X.get(j))) {
@@ -119,6 +168,7 @@ public class RsaAttacks {
             System.out.println(Cnew.mod(N));
             System.out.println("Real C = ");
             System.out.println(C);
-        }
+        }*/
+
     }
 }
